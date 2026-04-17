@@ -1,0 +1,22 @@
+# Resumo das Alterações - Atualização do Front-End (Gestao de Frota)
+
+Todas as alterações necessárias para adaptar o front-end às novas rotas da API foram concluídas com sucesso. Abaixo está o resumo do que foi modificado no projeto:
+
+## index.html (Interface)
+
+- Veículos: Removido o campo "Motorista" assim como as sugestões autocompletáveis para ele. Agora, a tela de veículos aceita apenas os dados referentes ao próprio veículo.
+- Motoristas: 
+  - O campo de 'Idade' foi substituído pelo campo de 'Data de Nascimento'.
+  - O campo de 'Validade da CNH' foi removido inteiramente do layout.
+
+## script.js (Comportamento e Integração API)
+
+- Veículos (/api/veiculos):
+  - A exibição do card não carrega mais e nem exibe o dado do motorista atual.
+  - A edição não tenta mais buscar pelo motorista.
+  - Ao salvar o formulário, o payload {placa, marca, modelo, categoria, ano, km} é montado; garantimos que 'ano' e 'km' estão sendo enviados como valores numéricos para o backend.
+
+- Motoristas (/api/motoristas):
+  - Todas as interações (Salvar, Editar e Excluir) agora operam utilizando a chave estrangeira principal exigida pelas rotas, neste caso o 'cpf' (no lugar da versão antiga que utilizava 'id').
+  - As URLs enviadas nas chamadas PUT e DELETE agora estão formatadas como /api/motoristas/{cpf}.
+  - O corpo dos dados salvos no POST e PUT agora envia fielmente { cpf, nome, telefone, data_nascimento, cnh, email }.

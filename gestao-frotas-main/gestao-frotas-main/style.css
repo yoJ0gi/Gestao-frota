@@ -1,0 +1,518 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* ================= RESET ================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ================= VARIÁVEIS ================= */
+:root {
+  --font-family: 'Outfit', sans-serif;
+  --bg-main: #f4f7fb;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-input: #ffffff;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --border: rgba(209, 213, 219, 0.5);
+  
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --success: #10b981;
+  --success-hover: #059669;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+
+  --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.05);
+  --shadow-md: 0 10px 30px -5px rgba(0,0,0,0.08);
+  --shadow-glow: 0 10px 40px -10px rgba(37, 99, 235, 0.4);
+  --backdrop: blur(12px);
+}
+
+body.dark {
+  --bg-main: #0B1120;
+  --bg-card: rgba(30, 41, 59, 0.6);
+  --bg-input: #0f172a;
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: rgba(51, 65, 85, 0.8);
+  
+  --shadow-sm: 0 4px 10px rgba(0,0,0,0.3);
+  --shadow-md: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+/* ================= BASE ================= */
+body {
+  font-family: var(--font-family);
+  background: var(--bg-main);
+  color: var(--text);
+  transition: all 0.4s ease;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar {
+  width: 300px; /* Alargamos o sidebar */
+  padding: 35px 25px;
+  background: linear-gradient(160deg, #0f172a, #1e293b);
+  color: #fff;
+  box-shadow: 4px 0 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar h2 {
+  text-align: center;
+  margin-bottom: 45px;
+  font-weight: 800;
+  font-size: 1.8rem;
+  letter-spacing: -0.5px;
+  background: linear-gradient(to right, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  text-decoration: none;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #cbd5e1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar nav a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(8px);
+  color: #fff;
+}
+
+.sidebar nav a.active {
+  background: linear-gradient(135deg, var(--primary), #4f46e5);
+  color: #fff;
+  box-shadow: var(--shadow-glow);
+  font-weight: 600;
+}
+
+/* ================= CONTENT ================= */
+.content {
+  flex: 1;
+  padding: 50px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page {
+  display: none;
+  animation: fadeSlideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.page.active {
+  display: block;
+}
+
+@keyframes fadeSlideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* ================= HEADER ================= */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+}
+
+/* Botão Tema Escuro */
+#themeToggleBtn {
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--text);
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+#themeToggleBtn:hover {
+  background: rgba(148, 163, 184, 0.25);
+  transform: translateY(-2px);
+}
+
+/* ================= CARDS ================= */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 25px;
+}
+
+.card {
+  padding: 30px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  backdrop-filter: var(--backdrop);
+  -webkit-backdrop-filter: var(--backdrop);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+body.dark .card:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.card p {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.card h2 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--text), #64748b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+body.dark .card h2 {
+  background: linear-gradient(135deg, #fff, #94a3b8);
+  -webkit-background-clip: text;
+}
+
+/* Cards das listas (Veículos, Motoristas, etc) */
+#veiculosList .card, #motoristasList .card, #manutencoesList .card, #abastecimentosList .card {
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+}
+
+#veiculosList .card p b, #motoristasList .card p b {
+  font-size: 1.3rem;
+  color: var(--text);
+}
+
+/* ================= FORMS E INPUTS ================= */
+.page-inner {
+  margin-top: 30px;
+}
+
+.form-panel {
+  margin-top: 35px;
+  padding: 35px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  backdrop-filter: var(--backdrop);
+  -webkit-backdrop-filter: var(--backdrop);
+  box-shadow: var(--shadow-md);
+  max-width: 600px;
+  animation: fadeSlideUp 0.4s ease;
+}
+
+.form-panel h3 {
+  font-size: 1.5rem;
+  margin-bottom: 25px;
+  font-weight: 700;
+}
+
+.form-panel label {
+  display: block;
+  margin-top: 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.form-panel input,
+.form-panel select,
+.search-input {
+  width: 100%;
+  padding: 16px 20px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text);
+  font-size: 1.05rem;
+  font-family: inherit;
+  transition: all 0.25s;
+}
+
+.search-input {
+  max-width: 450px;
+  margin-bottom: 25px;
+  box-shadow: var(--shadow-sm);
+}
+
+.form-panel input:focus,
+.form-panel select:focus,
+.search-input:focus {
+  border-color: var(--primary);
+  outline: none;
+  background: var(--bg-input);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+/* ================= BOTÕES ================= */
+button {
+  padding: 14px 28px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+#addVeiculoBtn,
+#addMotoristaBtn,
+#addManutencaoBtn,
+#addAbastecimentoBtn {
+  background: linear-gradient(135deg, var(--primary), #3b82f6);
+  color: #fff;
+  margin-bottom: 25px;
+  padding: 16px 32px;
+  font-size: 1.1rem;
+  border-radius: 50px; /* Pílula para o CTA principal */
+  box-shadow: var(--shadow-glow);
+}
+
+#addVeiculoBtn:hover,
+#addMotoristaBtn:hover,
+#addManutencaoBtn:hover,
+#addAbastecimentoBtn:hover {
+  box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.5);
+}
+
+.form-actions {
+  margin-top: 30px;
+  display: flex;
+  gap: 15px;
+}
+
+#saveVeiculo,
+#saveMotorista,
+#saveManutencao,
+#saveAbastecimento {
+  background: var(--success);
+  color: #fff;
+  flex: 1; /* Preencher espaço */
+}
+
+#saveVeiculo:hover,
+#saveMotorista:hover,
+#saveManutencao:hover,
+#saveAbastecimento:hover {
+  background: var(--success-hover);
+}
+
+#cancelVeiculo,
+#cancelMotorista,
+#cancelManutencao,
+#cancelAbastecimento {
+  background: var(--danger);
+  color: #fff;
+}
+
+#cancelVeiculo:hover,
+#cancelMotorista:hover,
+#cancelManutencao:hover,
+#cancelAbastecimento:hover {
+  background: var(--danger-hover);
+}
+
+/* Botões nos cards das listas */
+.card button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.card button:first-of-type {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--primary);
+}
+
+.card button:first-of-type:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.card button:last-of-type {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+
+.card button:last-of-type:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* ================= AUTOCOMPLETE ================= */
+.autocomplete-container {
+  position: relative;
+}
+
+.sugestoes {
+  list-style: none;
+  position: absolute;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-card);
+  backdrop-filter: var(--backdrop);
+  -webkit-backdrop-filter: var(--backdrop);
+  z-index: 10;
+  box-shadow: var(--shadow-md);
+  margin-top: 5px;
+}
+
+.sugestoes li {
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-weight: 500;
+}
+
+.sugestoes li:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--primary);
+}
+
+/* ================= ALERTAS ================= */
+.alerts {
+  margin-top: 40px;
+  padding: 30px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  backdrop-filter: var(--backdrop);
+  -webkit-backdrop-filter: var(--backdrop);
+  box-shadow: var(--shadow-md);
+}
+
+.alerts h3 {
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+}
+
+/* ================= UTIL ================= */
+.hidden {
+  display: none !important;
+}
+
+/* ================= RESPONSIVO ================= */
+@media (max-width: 900px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .sidebar h2 {
+    margin-bottom: 0;
+    font-size: 1.4rem;
+  }
+
+  .sidebar nav {
+    flex-direction: row;
+    gap: 5px;
+    overflow-x: auto;
+  }
+
+  .sidebar nav a {
+    padding: 10px 15px;
+    font-size: 0.95rem;
+  }
+
+  .content {
+    padding: 25px;
+  }
+}
