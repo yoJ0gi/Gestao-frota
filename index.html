@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,75 +11,70 @@
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div class="layout">
+  <div class="layout">
 
-  <aside class="sidebar">
-    <div class="sidebar-brand">
-      <i class="ph ph-heartbeat"></i>
-      <h2>MedFleet</h2>
-    </div>
-    <nav>
-      <a href="#" class="active" data-target="dashboardPage"><i class="ph ph-squares-four"></i> Dashboard</a>
-      <a href="#" data-target="veiculosPage"><i class="ph ph-ambulance"></i> Veículos</a>
-      <a href="#" data-target="motoristasPage"><i class="ph ph-steering-wheel"></i> Motoristas</a>
-      <!-- <a href="#" data-target="manutencoesPage"><i class="ph ph-wrench"></i> Manutenções</a> -->
-      <!-- <a href="#" data-target="abastecimentosPage"><i class="ph ph-gas-pump"></i> Abastecimentos</a> -->
-    </nav>
-  </aside>
-
-  <main class="content">
-
-    <section id="dashboardPage" class="page active">
-      <div class="page-header">
-        <div>
-          <h1>Dashboard</h1>
-          <p class="subtitle">Visão geral da sua frota</p>
-        </div>
-        <button id="themeToggleBtn" type="button">Modo Dark</button>
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <i class="ph ph-heartbeat"></i>
+        <h2>MedFleet</h2>
       </div>
+      <nav>
+        <a href="#" class="active" data-target="dashboardPage"><i class="ph ph-squares-four"></i> Dashboard</a>
+        <a href="#" data-target="ocorrenciasPage"><i class="ph ph-warning-circle"></i> Ocorrências</a>
+        <a href="#" data-target="equipePage"><i class="ph ph-stethoscope"></i> Equipe Médica</a>
+        <a href="#" data-target="veiculosPage"><i class="ph ph-ambulance"></i> Viaturas</a>
+        <a href="#" data-target="motoristasPage"><i class="ph ph-steering-wheel"></i> Motoristas</a>
+      </nav>
+    </aside>
 
-      <div class="cards">
-        <div class="card">
-          <p><i class="ph ph-ambulance" style="margin-right: 6px; font-size: 16px;"></i> Total de Veículos</p>
-          <h2 id="totalVeiculos">0</h2>
+    <main class="content">
+
+      <section id="dashboardPage" class="page active">
+        <div class="page-header">
+          <div>
+            <h1>Dashboard</h1>
+            <p class="subtitle">Visão geral da sua frota</p>
+          </div>
+          <button id="themeToggleBtn" type="button">Modo Dark</button>
         </div>
 
-        <div class="card">
-          <p><i class="ph ph-steering-wheel" style="margin-right: 6px; font-size: 16px;"></i> Motoristas Ativos</p>
-          <h2 id="totalMotoristas">0</h2>
+        <div class="cards">
+          <div class="card">
+            <p><i class="ph ph-warning-circle" style="margin-right: 6px; font-size: 16px;"></i> Ocorrências Ativas</p>
+            <h2 id="totalOcorrencias">0</h2>
+          </div>
+
+          <div class="card">
+            <p><i class="ph ph-navigation-arrow" style="margin-right: 6px; font-size: 16px;"></i> Viaturas em Rota</p>
+            <h2 id="viaturasRota">0</h2>
+          </div>
+
+          <div class="card">
+            <p><i class="ph ph-users" style="margin-right: 6px; font-size: 16px;"></i> Profissionais Disponíveis</p>
+            <h2 id="equipeDisponivel">0</h2>
+          </div>
         </div>
 
-        <!-- <div class="card">
-          <p><i class="ph ph-wrench" style="margin-right: 6px; font-size: 16px;"></i> Manutenções</p>
-          <h2 id="totalManutencoes">0</h2>
+        <div class="alerts">
+          <h3>Alertas Recentes</h3>
+          <ul id="alertList"></ul>
         </div>
+      </section>
 
-        <div class="card">
-          <p><i class="ph ph-gas-pump" style="margin-right: 6px; font-size: 16px;"></i> Abastecimentos</p>
-          <h2 id="totalAbastecimentos">0</h2>
-        </div> -->
-      </div>
-
-      <div class="alerts">
-        <h3>Alertas Recentes</h3>
-        <ul id="alertList"></ul>
-      </div>
-    </section>
-
-    <section id="veiculosPage" class="page">
-      <div class="page-header">
-        <div>
-          <h1>Veículos Hospitalares</h1>
-          <p class="subtitle">Monitoramento e controle logístico em tempo real</p>
+      <section id="veiculosPage" class="page">
+        <div class="page-header">
+          <div>
+            <h1>Veículos Hospitalares</h1>
+            <p class="subtitle">Monitoramento e controle logístico em tempo real</p>
+          </div>
+          <button id="addVeiculoBtn" type="button"><i class="ph ph-plus-circle"></i> Adicionar Ambulância</button>
         </div>
-        <button id="addVeiculoBtn" type="button"><i class="ph ph-plus-circle"></i> Adicionar Ambulância</button>
-      </div>
-
-      <div class="split-layout">
-        <!-- Esquerda: Lista de Veículos -->
-        <div class="tracking-sidebar">
+        <div class="page-body">
+        <!-- Lista de Veículos -->
+        <div class="tracking-sidebar" id="veiculosSidebar">
           <div class="pill-filters">
             <p>Filtrar Status:</p>
             <div class="pill-group">
@@ -92,8 +88,13 @@
           <div id="veiculosList" class="tracking-grid"></div>
         </div>
 
-        <!-- Direita: Detalhes -->
-        <div class="vehicle-details-panel">
+        <!-- Detalhes (oculto por padrão) -->
+        <div class="vehicle-details-panel hidden" id="veiculosDetail">
+          <div class="details-top-bar">
+            <button class="close-details-btn" onclick="closeDetails('veiculos')">
+              <i class="ph ph-arrow-left"></i> Voltar para lista
+            </button>
+          </div>
           <div class="details-header">
             <div class="header-title">
               <h2 id="detailPlate">AMB-1020</h2>
@@ -117,7 +118,6 @@
                <img src="ambulance.png" alt="Ambulância em foco" />
              </div>
 
-             <!-- Detalhes Físicos do Veículo -->
              <div class="vehicle-info-grid">
                <div class="info-box">
                  <p>Marca / Modelo</p>
@@ -149,81 +149,81 @@
         </div>
       </div>
 
-      <!-- MODAL CADASTRO DE VEÍCULOS -->
-      <div id="veiculoModal" class="modal-overlay hidden">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3><i class="ph ph-ambulance"></i> Cadastrar Novo Veículo</h3>
-            <button class="close-modal-btn" id="closeVeiculoModal"><i class="ph ph-x"></i></button>
-          </div>
-          
-          <div class="modal-body form-grid">
-            <div class="form-group">
-              <label>Placa</label>
-              <input id="inputPlaca" placeholder="EX: ABC-1234" />
+        <!-- MODAL CADASTRO DE VEÍCULOS -->
+        <div id="veiculoModal" class="modal-overlay hidden">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3><i class="ph ph-ambulance"></i> Cadastrar Novo Veículo</h3>
+              <button class="close-modal-btn" id="closeVeiculoModal"><i class="ph ph-x"></i></button>
             </div>
 
-            <div class="form-group">
-              <label>Marca</label>
-              <input id="inputMarca" placeholder="EX: Mercedes-Benz" /> 
-            </div>
+            <div class="modal-body form-grid">
+              <div class="form-group">
+                <label>Placa</label>
+                <input id="inputPlaca" placeholder="EX: ABC-1234" />
+              </div>
 
-            <div class="form-group">
-              <label>Modelo</label>
-              <input id="inputModelo" placeholder="EX: Sprinter" />
-            </div>
+              <div class="form-group">
+                <label>Marca</label>
+                <input id="inputMarca" placeholder="EX: Mercedes-Benz" />
+              </div>
 
-            <div class="form-group">
-              <label>Categoria (CNH)</label>
-              <select id="inputCategoria">
-                <option value="">Selecione...</option>
-                <option value="UTI Móvel">UTI Móvel</option>
-                <option value="Suporte Básico">Suporte Básico</option>
-                <option value="Administrativo">Administrativo</option>
-                <option value="Apoio Rápido">Apoio Rápido</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label>Ano de Fabricação</label>
-              <input id="inputAno" type="number" placeholder="2024" />
-            </div>
+              <div class="form-group">
+                <label>Modelo</label>
+                <input id="inputModelo" placeholder="EX: Sprinter" />
+              </div>
 
-            <div class="form-group">
-              <label>Quilometragem (KM)</label>
-              <input id="inputKm" type="number" placeholder="0" />
-            </div>
+              <div class="form-group">
+                <label>Categoria (CNH)</label>
+                <select id="inputCategoria">
+                  <option value="">Selecione...</option>
+                  <option value="UTI Móvel">UTI Móvel</option>
+                  <option value="Suporte Básico">Suporte Básico</option>
+                  <option value="Administrativo">Administrativo</option>
+                  <option value="Apoio Rápido">Apoio Rápido</option>
+                </select>
+              </div>
 
-            <div class="form-group full-width">
-              <label>Motorista Responsável</label>
-              <div class="autocomplete-container">
-                <input id="inputMotorista" placeholder="Buscar motorista cadastrado..." autocomplete="off" />
-                <ul id="motoristaSugestoes" class="sugestoes hidden"></ul>
+              <div class="form-group">
+                <label>Ano de Fabricação</label>
+                <input id="inputAno" type="number" placeholder="2024" />
+              </div>
+
+              <div class="form-group">
+                <label>Quilometragem (KM)</label>
+                <input id="inputKm" type="number" placeholder="0" />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Motorista Responsável</label>
+                <div class="autocomplete-container">
+                  <input id="inputMotorista" placeholder="Buscar motorista cadastrado..." autocomplete="off" />
+                  <ul id="motoristaSugestoes" class="sugestoes hidden"></ul>
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div class="modal-footer">
-            <button id="cancelVeiculo" class="btn-outline-danger">Cancelar</button>
-            <button id="saveVeiculo" class="btn-primary"><i class="ph ph-floppy-disk"></i> Salvar Veículo</button>
+
+            <div class="modal-footer">
+              <button id="cancelVeiculo" class="btn-outline-danger">Cancelar</button>
+              <button id="saveVeiculo" class="btn-primary"><i class="ph ph-floppy-disk"></i> Salvar Veículo</button>
+            </div>
           </div>
         </div>
-      </div>
 
-    </section>
+      </section>
 
-    <section id="motoristasPage" class="page">
-      <div class="page-header">
-        <div>
-          <h1>Motoristas</h1>
-          <p class="subtitle">Gestão da equipe de condutores</p>
+      <section id="motoristasPage" class="page">
+        <div class="page-header">
+          <div>
+            <h1>Motoristas</h1>
+            <p class="subtitle">Gestão da equipe de condutores</p>
+          </div>
+          <button id="addMotoristaBtn" type="button"><i class="ph ph-plus-circle"></i> Adicionar Motorista</button>
         </div>
-        <button id="addMotoristaBtn" type="button"><i class="ph ph-plus-circle"></i> Adicionar Motorista</button>
-      </div>
 
-      <div class="split-layout">
-        <!-- Esquerda: Lista de Motoristas -->
-        <div class="tracking-sidebar">
+        <div class="page-body">
+        <!-- Lista de Motoristas -->
+        <div class="tracking-sidebar" id="motoristasSidebar">
           <div class="pill-filters">
             <p>Filtrar Status:</p>
             <div class="pill-group">
@@ -236,8 +236,13 @@
           <div id="motoristasList" class="tracking-grid"></div>
         </div>
 
-        <!-- Direita: Detalhes -->
-        <div class="vehicle-details-panel">
+        <!-- Detalhes (oculto por padrão) -->
+        <div class="vehicle-details-panel hidden" id="motoristasDetail">
+          <div class="details-top-bar">
+            <button class="close-details-btn" onclick="closeDetails('motoristas')">
+              <i class="ph ph-arrow-left"></i> Voltar para lista
+            </button>
+          </div>
           <div class="details-header">
             <div class="header-title">
               <h2 id="detailMotoristaNome">Selecione um Motorista</h2>
@@ -260,7 +265,6 @@
                <i class="ph ph-user-circle" style="font-size: 120px; color: var(--text-muted);"></i>
              </div>
 
-             <!-- Detalhes Físicos do Motorista -->
              <div class="vehicle-info-grid">
                <div class="info-box">
                  <p>Idade</p>
@@ -296,138 +300,413 @@
         </div>
       </div>
 
-      <!-- MODAL CADASTRO DE MOTORISTAS -->
-      <div id="motoristaModal" class="modal-overlay hidden">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3><i class="ph ph-steering-wheel"></i> Cadastrar Novo Motorista</h3>
-            <button class="close-modal-btn" id="closeMotoristaModal"><i class="ph ph-x"></i></button>
+        <!-- MODAL CADASTRO DE MOTORISTAS -->
+        <div id="motoristaModal" class="modal-overlay hidden">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3><i class="ph ph-steering-wheel"></i> Cadastrar Novo Motorista</h3>
+              <button class="close-modal-btn" id="closeMotoristaModal"><i class="ph ph-x"></i></button>
+            </div>
+
+            <div class="modal-body form-grid">
+              <div class="form-group full-width">
+                <label>Nome Completo</label>
+                <input id="inputNomeMotorista" placeholder="EX: João da Silva" />
+              </div>
+
+              <div class="form-group">
+                <label>CPF</label>
+                <input id="inputCPF" placeholder="EX: 000.000.000-00" />
+              </div>
+
+              <div class="form-group">
+                <label>Idade</label>
+                <input id="inputIdadeMotorista" type="number" placeholder="EX: 35" />
+              </div>
+
+              <div class="form-group">
+                <label>CNH</label>
+                <input id="inputCNH" placeholder="Número da CNH" />
+              </div>
+
+              <div class="form-group">
+                <label>Validade CNH</label>
+                <input id="inputValidadeCNH" type="date" placeholder="Selecione a data" />
+              </div>
+
+              <div class="form-group">
+                <label>Telefone</label>
+                <input id="inputTelefone" placeholder="(00) 00000-0000" />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Email</label>
+                <input id="inputEmail" type="email" placeholder="email@exemplo.com" />
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button id="cancelMotorista" class="btn-outline-danger">Cancelar</button>
+              <button id="saveMotorista" class="btn-primary"><i class="ph ph-floppy-disk"></i> Salvar Motorista</button>
+            </div>
           </div>
-          
-          <div class="modal-body form-grid">
-            <div class="form-group full-width">
-              <label>Nome Completo</label>
-              <input id="inputNomeMotorista" placeholder="EX: João da Silva" />
-            </div>
+        </div>
+      </section>
 
-            <div class="form-group">
-              <label>CPF</label>
-              <input id="inputCPF" placeholder="EX: 000.000.000-00" /> 
-            </div>
+      <!-- NOVA SEÇÃO: EQUIPE MÉDICA -->
+      <section id="equipePage" class="page">
+        <div class="page-header">
+          <div>
+            <h1>Equipe Médica</h1>
+            <p class="subtitle">Gestão de médicos, enfermeiros e socorristas</p>
+          </div>
+          <button id="addMembroBtn" type="button"><i class="ph ph-plus-circle"></i> Adicionar Membro</button>
+        </div>
 
-            <div class="form-group">
-              <label>Idade</label>
-              <input id="inputIdadeMotorista" type="number" placeholder="EX: 35" />
-            </div>
-
-            <div class="form-group">
-              <label>CNH</label>
-              <input id="inputCNH" placeholder="Número da CNH" />
-            </div>
-            
-            <div class="form-group">
-              <label>Validade CNH</label>
-              <input id="inputValidadeCNH" type="date" placeholder="Selecione a data" />
-            </div>
-
-            <div class="form-group">
-              <label>Telefone</label>
-              <input id="inputTelefone" placeholder="(00) 00000-0000" />
-            </div>
-
-            <div class="form-group full-width">
-              <label>Email</label>
-              <input id="inputEmail" type="email" placeholder="email@exemplo.com" />
+        <div class="page-body">
+        <!-- Lista de Equipe -->
+        <div class="tracking-sidebar" id="equipeSidebar">
+          <div class="pill-filters">
+            <p>Filtrar Status:</p>
+            <div class="pill-group">
+              <button class="pill active">Todos <span class="badge" id="badgeTotalEquipe">0</span></button>
+              <button class="pill">Disponível</button>
+              <button class="pill">Em Rota</button>
             </div>
           </div>
-          
-          <div class="modal-footer">
-            <button id="cancelMotorista" class="btn-outline-danger">Cancelar</button>
-            <button id="saveMotorista" class="btn-primary"><i class="ph ph-floppy-disk"></i> Salvar Motorista</button>
+          <div id="equipeList" class="tracking-grid"></div>
+        </div>
+
+        <!-- Detalhes (oculto por padrão) -->
+        <div class="vehicle-details-panel hidden" id="equipeDetail">
+          <div class="details-top-bar">
+            <button class="close-details-btn" onclick="closeDetails('equipe')">
+              <i class="ph ph-arrow-left"></i> Voltar para lista
+            </button>
+          </div>
+          <div class="details-header">
+            <div class="header-title">
+              <h2 id="detailEquipeNome">Selecione um Profissional</h2>
+              <span id="detailEquipeStatus" class="status-badge badge-available"><i class="ph ph-check-circle"></i> Disponível</span>
+            </div>
+          </div>
+          <div class="details-content">
+             <div class="large-vehicle-image" style="display: flex; justify-content: center; align-items: center; background: var(--bg-secondary); border-radius: 12px; padding: 2rem;">
+               <i class="ph ph-stethoscope" style="font-size: 100px; color: var(--primary);"></i>
+             </div>
+             <div class="vehicle-info-grid">
+               <div class="info-box">
+                 <p>Cargo</p>
+                 <h4 id="detailEquipeCargo">-</h4>
+               </div>
+               <div class="info-box">
+                 <p>CRM / Coren</p>
+                 <h4 id="detailEquipeRegistro">-</h4>
+               </div>
+               <div class="info-box">
+                 <p>Telefone</p>
+                 <h4 id="detailEquipeTelefone">-</h4>
+               </div>
+               <div class="info-box">
+                 <p>Email</p>
+                 <h4 id="detailEquipeEmail">-</h4>
+               </div>
+             </div>
+             <div class="admin-actions">
+               <button class="btn-outline" id="btnEditMembro"><i class="ph ph-pencil-simple"></i> Editar Cadastro</button>
+               <button class="btn-outline-danger" id="btnDeleteMembro"><i class="ph ph-trash"></i> Remover</button>
+             </div>
           </div>
         </div>
       </div>
-    </section>
 
-    <section id="manutencoesPage" class="page">
-      <h1>Manutenções</h1>
-      <input id="searchManutencoes" class="search-input" placeholder="Buscar por veículo ou data" />
+        <!-- MODAL CADASTRO EQUIPE -->
+        <div id="equipeModal" class="modal-overlay hidden">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3><i class="ph ph-stethoscope"></i> Cadastrar Profissional</h3>
+              <button class="close-modal-btn" id="closeEquipeModal"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body form-grid">
+              <div class="form-group full-width">
+                <label>Nome Completo</label>
+                <input id="inputMembroNome" placeholder="EX: Dr. Marcos Paulo" />
+              </div>
+              <div class="form-group">
+                <label>Cargo</label>
+                <select id="inputMembroCargo">
+                  <option value="Médico">Médico</option>
+                  <option value="Enfermeiro">Enfermeiro</option>
+                  <option value="Socorrista">Socorrista</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>CRM / Coren</label>
+                <input id="inputMembroRegistro" placeholder="Número do registro" />
+              </div>
+              <div class="form-group">
+                <label>Telefone</label>
+                <input id="inputMembroTelefone" placeholder="(00) 00000-0000" />
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input id="inputMembroEmail" type="email" placeholder="email@exemplo.com" />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button id="cancelMembro" class="btn-outline-danger">Cancelar</button>
+              <button id="saveMembro" class="btn-primary"><i class="ph ph-floppy-disk"></i> Salvar Profissional</button>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <button id="addManutencaoBtn" type="button">+ Nova Manutenção</button>
-
-      <div id="manutencoesList" class="page-inner"></div>
-
-      <div id="manutencaoForm" class="hidden form-panel">
-        <h3>Cadastrar Manutenção</h3>
-
-        <label>Veículo</label>
-        <div class="autocomplete-container">
-          <input id="inputVeiculoManut" placeholder="Buscar veículo..." autocomplete="off" />
-          <ul id="veiculoSugestoesManut" class="sugestoes hidden"></ul>
+      <!-- SEÇÃO: OCORRÊNCIAS -->
+      <section id="ocorrenciasPage" class="page">
+        <div class="page-header">
+          <div>
+            <h1>Gestão de Ocorrências</h1>
+            <p class="subtitle">Abertura e acompanhamento de emergências e solicitações</p>
+          </div>
+          <button id="addOcorrenciaBtn" type="button"><i class="ph ph-plus-circle"></i> Nova Ocorrência</button>
         </div>
 
-        <label>Data</label>
-        <input id="inputDataManut" type="date" placeholder="Selecione a data" />
+        <div class="page-body">
+        <!-- Lista -->
+        <div class="tracking-sidebar" id="ocorrenciasSidebar">
+          <div class="pill-filters">
+            <p>Filtrar Status:</p>
+            <div class="pill-group">
+              <button class="pill active">Todas <span class="badge" id="badgeTotalOcorrencias">0</span></button>
+              <button class="pill">Ativa</button>
+              <button class="pill">Em Atend.</button>
+              <button class="pill">Finalizada</button>
+            </div>
+          </div>
+          <div id="ocorrenciasList" class="tracking-grid"></div>
+        </div>
 
-        <label>Status</label>
-        <input id="inputStatusManut" placeholder="Status" />
+        <!-- Detalhes (oculto por padrão) -->
+        <div class="vehicle-details-panel hidden" id="ocorrenciasDetail">
+          <div class="details-top-bar">
+            <button class="close-details-btn" onclick="closeDetails('ocorrencias')">
+              <i class="ph ph-arrow-left"></i> Voltar para lista
+            </button>
+          </div>
+          <div class="details-header">
+            <div class="header-title">
+              <h2 id="detailOcorrenciaTitulo">Selecione uma Ocorrência</h2>
+              <span id="detailOcorrenciaStatus" class="status-badge badge-emergency"><i class="ph ph-warning-circle"></i> Pendente</span>
+            </div>
+            <div class="header-actions">
+              <button class="btn-outline-primary" id="btnResolverOcorrencia"><i class="ph ph-check-circle"></i> Finalizar</button>
+            </div>
+          </div>
 
-        <div class="form-actions">
-          <button id="saveManutencao" type="button">Salvar</button>
-          <button id="cancelManutencao" type="button">Cancelar</button>
+          <div class="details-tabs">
+            <button class="tab active">Detalhes da Ocorrência</button>
+          </div>
+
+          <div class="details-content">
+             <div class="large-vehicle-image" style="display: flex; justify-content: center; align-items: center; background: var(--bg-secondary); border-radius: 12px; padding: 2rem;">
+               <i class="ph ph-warning-circle" style="font-size: 80px; color: var(--status-emergency);"></i>
+             </div>
+
+             <div class="vehicle-info-grid">
+               <div class="info-box">
+                 <p>Prioridade</p>
+                 <h4 id="detailOcorrenciaPrioridade">-</h4>
+               </div>
+               <div class="info-box">
+                 <p>Data</p>
+                 <h4 id="detailOcorrenciaData">-</h4>
+               </div>
+               <div class="info-box full-width">
+                 <p>Paciente / Solicitante</p>
+                 <h4 id="detailOcorrenciaPaciente">-</h4>
+               </div>
+               <div class="info-box full-width">
+                 <p>Endereço / Localização</p>
+                 <h4 id="detailOcorrenciaEndereco">-</h4>
+               </div>
+               <div class="info-box">
+                 <p>Viatura</p>
+                 <h4 id="detailOcorrenciaVeiculo">-</h4>
+               </div>
+               <div class="info-box">
+                 <p>Equipe / Motorista</p>
+                 <h4 id="detailOcorrenciaEquipe">-</h4>
+               </div>
+               <div class="info-box full-width">
+                 <p>Descrição</p>
+                 <p id="detailOcorrenciaDescricao" style="margin-top: 8px; line-height: 1.6; color: var(--text);">-</p>
+               </div>
+             </div>
+
+             <div class="admin-actions" style="margin-top: 30px;">
+               <button class="btn-outline" id="btnEditOcorrencia"><i class="ph ph-pencil-simple"></i> Editar Ocorrência</button>
+               <button class="btn-outline-danger" id="btnDeleteOcorrencia"><i class="ph ph-trash"></i> Remover</button>
+             </div>
+          </div>
         </div>
       </div>
-    </section>
 
-    <!-- ABASTECIMENTOS -->
-    <section id="abastecimentosPage" class="page">
-      <h1>Abastecimentos</h1>
-      <input id="searchAbastecimentos" class="search-input" placeholder="Buscar por veículo, posto ou data" />
+        <!-- MODAL ABERTURA OCORRÊNCIA -->
+        <div id="ocorrenciaModal" class="modal-overlay hidden">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3><i class="ph ph-warning-circle"></i> Nova Ocorrência</h3>
+              <button class="close-modal-btn" id="closeOcorrenciaModal"><i class="ph ph-x"></i></button>
+            </div>
 
-      <button id="addAbastecimentoBtn" type="button">+ Novo Abastecimento</button>
+            <div class="modal-body form-grid">
+              <div class="form-group full-width">
+                <label>Título / Tipo</label>
+                <input id="inputOcorrenciaTitulo" placeholder="EX: Mal súbito, Acidente de trânsito..." />
+              </div>
 
-      <div id="abastecimentosList" class="page-inner"></div>
+              <div class="form-group">
+                <label>Paciente / Solicitante</label>
+                <input id="inputOcorrenciaPaciente" placeholder="Nome se aplicável" />
+              </div>
 
-      <div id="abastecimentoForm" class="hidden form-panel">
-        <h3>Cadastrar Abastecimento</h3>
-        
-        <label>Veículo</label>
-        <div class="autocomplete-container">
-          <input id="inputVeiculoAbast" placeholder="Buscar veículo..." autocomplete="off" />
-          <ul id="veiculoSugestoesAbast" class="sugestoes hidden"></ul>
+              <div class="form-group">
+                <label>Prioridade</label>
+                <select id="inputOcorrenciaPrioridade">
+                  <option value="Baixa">Baixa (Rotina)</option>
+                  <option value="Média">Média (Urgência)</option>
+                  <option value="Alta">Alta (Emergência)</option>
+                  <option value="Crítica">Crítica (Risco de Vida)</option>
+                </select>
+              </div>
+
+              <div class="form-group full-width">
+                <label>Endereço</label>
+                <input id="inputOcorrenciaEndereco" placeholder="Endereço da ocorrência..." />
+              </div>
+
+              <div class="form-group">
+                <label>Status</label>
+                <select id="inputOcorrenciaStatus">
+                  <option value="Ativa">Ativa</option>
+                  <option value="Em Atendimento">Em Atendimento</option>
+                  <option value="Finalizada">Finalizada</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Viatura Despachada (Opcional)</label>
+                <div class="autocomplete-container">
+                  <input id="inputOcorrenciaVeiculo" placeholder="Buscar viatura..." autocomplete="off" />
+                  <ul id="ocorrenciaVeiculoSugestoes" class="sugestoes hidden"></ul>
+                </div>
+              </div>
+
+              <div class="form-group full-width">
+                <label>Equipe / Motorista (Opcional)</label>
+                <div class="autocomplete-container">
+                  <input id="inputOcorrenciaEquipe" placeholder="Buscar profissional..." autocomplete="off" />
+                  <ul id="ocorrenciaEquipeSugestoes" class="sugestoes hidden"></ul>
+                </div>
+              </div>
+
+              <div class="form-group full-width">
+                <label>Descrição Detalhada</label>
+                <textarea id="inputOcorrenciaDescricao" rows="4"
+                  placeholder="Descreva os sintomas, situação do local, etc..."
+                  style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 12px; font-family: 'Inter', sans-serif; resize: vertical;"></textarea>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button id="cancelOcorrencia" class="btn-outline-danger">Cancelar</button>
+              <button id="saveOcorrencia" class="btn-primary"><i class="ph ph-paper-plane-right"></i> Salvar
+                Ocorrência</button>
+            </div>
+          </div>
         </div>
-        
-        <label>Data</label>
-        <input id="inputDataAbast" type="date" placeholder="Selecione a data" />
-        
-        <label for="combustivel">Tipo de Combustível</label>
-        <select id="combustivel" name="combustivel" required>
-          <option value="">Selecione</option>
-          <option value="etanol">Etanol</option>
-          <option value="gasolina">Gasolina</option>
-          <option value="alcool">Álcool</option>
-          <option value="diesel">Diesel</option>
-        </select>
+      </section>
 
-        <label>Nome do Posto</label>
-        <input id="inputPosto" placeholder="Posto de combustível" />
+      <section id="manutencoesPage" class="page">
+        <h1>Manutenções</h1>
+        <input id="searchManutencoes" class="search-input" placeholder="Buscar por veículo ou data" />
 
-        <label>Litros</label>
-        <input id="inputLitros" type="number" step="0.01" placeholder="Litros" />
+        <button id="addManutencaoBtn" type="button">+ Nova Manutenção</button>
 
-        <label>Valor</label>
-        <input id="inputValor" type="number" step="0.01" placeholder="Valor" />
+        <div id="manutencoesList" class="page-inner"></div>
 
-        <div class="form-actions">
-          <button id="saveAbastecimento" type="button">Salvar</button>
-          <button id="cancelAbastecimento" type="button">Cancelar</button>
+        <div id="manutencaoForm" class="hidden form-panel">
+          <h3>Cadastrar Manutenção</h3>
+
+          <label>Veículo</label>
+          <div class="autocomplete-container">
+            <input id="inputVeiculoManut" placeholder="Buscar veículo..." autocomplete="off" />
+            <ul id="veiculoSugestoesManut" class="sugestoes hidden"></ul>
+          </div>
+
+          <label>Data</label>
+          <input id="inputDataManut" type="date" placeholder="Selecione a data" />
+
+          <label>Status</label>
+          <input id="inputStatusManut" placeholder="Status" />
+
+          <div class="form-actions">
+            <button id="saveManutencao" type="button">Salvar</button>
+            <button id="cancelManutencao" type="button">Cancelar</button>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-  </main>
-</div>
+      <!-- ABASTECIMENTOS -->
+      <section id="abastecimentosPage" class="page">
+        <h1>Abastecimentos</h1>
+        <input id="searchAbastecimentos" class="search-input" placeholder="Buscar por veículo, posto ou data" />
 
-<script src="script.js"></script>
+        <button id="addAbastecimentoBtn" type="button">+ Novo Abastecimento</button>
+
+        <div id="abastecimentosList" class="page-inner"></div>
+
+        <div id="abastecimentoForm" class="hidden form-panel">
+          <h3>Cadastrar Abastecimento</h3>
+
+          <label>Veículo</label>
+          <div class="autocomplete-container">
+            <input id="inputVeiculoAbast" placeholder="Buscar veículo..." autocomplete="off" />
+            <ul id="veiculoSugestoesAbast" class="sugestoes hidden"></ul>
+          </div>
+
+          <label>Data</label>
+          <input id="inputDataAbast" type="date" placeholder="Selecione a data" />
+
+          <label for="combustivel">Tipo de Combustível</label>
+          <select id="combustivel" name="combustivel" required>
+            <option value="">Selecione</option>
+            <option value="etanol">Etanol</option>
+            <option value="gasolina">Gasolina</option>
+            <option value="alcool">Álcool</option>
+            <option value="diesel">Diesel</option>
+          </select>
+
+          <label>Nome do Posto</label>
+          <input id="inputPosto" placeholder="Posto de combustível" />
+
+          <label>Litros</label>
+          <input id="inputLitros" type="number" step="0.01" placeholder="Litros" />
+
+          <label>Valor</label>
+          <input id="inputValor" type="number" step="0.01" placeholder="Valor" />
+
+          <div class="form-actions">
+            <button id="saveAbastecimento" type="button">Salvar</button>
+            <button id="cancelAbastecimento" type="button">Cancelar</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
 </body>
+
 </html>

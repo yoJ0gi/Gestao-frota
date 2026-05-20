@@ -4,9 +4,19 @@ let motoristaEditandoId = null;
 let veiculoEditandoId = null;
 let manutencaoEditandoId = null;
 let abastecimentoEditandoId = null;
+let ocorrenciaEditandoId = null;
+let equipeEditandoId = null;
 
 let motoristasCache = [];
 let veiculosCache = [];
+let equipeCache = [
+  { id: 1, nome: "Dr. Marcos Paulo", cargo: "Médico", registro: "CRM-12345", telefone: "(11) 98888-0000", email: "marcos@hospital.com", status: "Disponível" },
+  { id: 2, nome: "Enf. Joana Silva", cargo: "Enfermeiro", registro: "COREN-54321", telefone: "(11) 97777-1111", email: "joana@hospital.com", status: "Em Rota" }
+];
+let ocorrenciasCache = [
+  { id: 1, titulo: "Mal súbito", prioridade: "Alta", status: "Ativa", veiculo_nome: "AMB-1020", equipe_nome: "Dr. Marcos Paulo", paciente: "João das Neves", endereco: "Av. Paulista, 1000", descricao: "Paciente inconsciente na rua.", data: "2026-05-19" },
+  { id: 2, titulo: "Acidente de Trânsito", prioridade: "Crítica", status: "Em Atendimento", veiculo_nome: "HOS-4B21", equipe_nome: "Enf. Joana Silva", paciente: "Desconhecido", endereco: "Rodovia Castelo Branco, km 15", descricao: "Colisão entre dois carros.", data: "2026-05-18" }
+];
 
 document.querySelectorAll(".sidebar nav a").forEach((link) => {
   link.addEventListener("click", (e) => {
@@ -24,6 +34,32 @@ function showPage(pageId) {
   document.querySelector(`[data-target="${pageId}"]`).classList.add("active");
 
   loadPageData(pageId);
+}
+
+// ================= SHOW/CLOSE DETAILS =================
+const panelMap = {
+  veiculos:    { sidebar: 'veiculosSidebar',    detail: 'veiculosDetail' },
+  motoristas:  { sidebar: 'motoristasSidebar',  detail: 'motoristasDetail' },
+  equipe:      { sidebar: 'equipeSidebar',      detail: 'equipeDetail' },
+  ocorrencias: { sidebar: 'ocorrenciasSidebar', detail: 'ocorrenciasDetail' }
+};
+
+function showDetails(section) {
+  const map = panelMap[section];
+  if (!map) return;
+  const sidebar = document.getElementById(map.sidebar);
+  const detail = document.getElementById(map.detail);
+  if (sidebar) sidebar.classList.add('hidden');
+  if (detail) detail.classList.remove('hidden');
+}
+
+function closeDetails(section) {
+  const map = panelMap[section];
+  if (!map) return;
+  const sidebar = document.getElementById(map.sidebar);
+  const detail = document.getElementById(map.detail);
+  if (detail) detail.classList.add('hidden');
+  if (sidebar) sidebar.classList.remove('hidden');
 }
 
 document.getElementById("themeToggleBtn").onclick = () => {
@@ -124,6 +160,20 @@ function initAutocompletes() {
     () => veiculosCache,
     (v) => `${v.placa} - ${v.modelo}`
   );
+
+  setupAutocomplete(
+    "inputOcorrenciaVeiculo",
+    "ocorrenciaVeiculoSugestoes",
+    () => veiculosCache,
+    (v) => `${v.placa} - ${v.modelo}`
+  );
+
+  setupAutocomplete(
+    "inputOcorrenciaEquipe",
+    "ocorrenciaEquipeSugestoes",
+    () => equipeCache,
+    (e) => `${e.nome} (${e.cargo})`
+  );
 }
 
 async function loadDashboard() {
@@ -135,10 +185,9 @@ async function loadDashboard() {
       fetch(API + "/abastecimentos").then(r => r.json()).catch(() => [])
     ]);
 
-    totalVeiculos.textContent = v.length;
-    totalMotoristas.textContent = m.length;
-    totalManutencoes.textContent = man.length;
-    totalAbastecimentos.textContent = ab.length;
+    totalOcorrencias.textContent = ocorrenciasCache.length;
+    viaturasRota.textContent = veiculosCache.length;
+    equipeDisponivel.textContent = equipeCache.length;
   } catch(e) {}
 }
 
@@ -160,12 +209,10 @@ async function loadVeiculos() {
   veiculosCache.forEach((v, index) => {
     const card = document.createElement("div");
     card.className = "tracking-card";
+    card.dataset.id = v.id;
     if (v.id === selectedVehicleId) card.classList.add("selected");
 
     const status = statuses[index % statuses.length];
-
-    const eta = Math.floor(Math.random() * 60) + 10;
-    const distance = Math.floor(Math.random() * 200) + 20;
 
     card.innerHTML = `
       <div class="tc-header">
@@ -184,41 +231,24 @@ async function loadVeiculos() {
     list.appendChild(card);
   });
 
-  if (!selectedVehicleId && veiculosCache.length > 0) {
-    selectedVehicleId = veiculosCache[0].id;
-    selectVehicle(selectedVehicleId, statuses[0], true);
-  } else if (selectedVehicleId && veiculosCache.length > 0) {
-    // Força a atualização do painel da direita com os dados novos em caso de edição
-    const currentVIdx = veiculosCache.findIndex(v => v.id === selectedVehicleId);
-    if(currentVIdx > -1) {
-       selectVehicle(selectedVehicleId, statuses[currentVIdx % statuses.length], true);
-    }
-  } else if (veiculosCache.length === 0) {
-    // Se excluiu o último, limpa a tela direita
-    document.getElementById("detailPlate").textContent = "Nenhum veículo selecionado";
-    document.getElementById("detailStatus").innerHTML = "";
-    document.getElementById("detailStatus").className = "status-badge";
-    const el = docId => document.getElementById(docId);
-    if(el("detailModelo")) el("detailModelo").textContent = "-";
-    if(el("detailCategoria")) el("detailCategoria").textContent = "-";
-    if(el("detailAno")) el("detailAno").textContent = "-";
-    if(el("detailKm")) el("detailKm").textContent = "-";
-    if(el("detailMotorista")) el("detailMotorista").textContent = "-";
-  }
+  // Ensure the grid is visible and details hidden when loading
+  closeDetails('veiculos');
 }
 
-function selectVehicle(id, status, skipRender = false) {
+function selectVehicle(id, status) {
   selectedVehicleId = id;
   const v = veiculosCache.find(ve => ve.id === id);
   if (!v) return;
 
-  if (!skipRender) {
-    loadVeiculos();
-  } else {
-    // Just visually update the first card if skipRender is true
-    const firstCard = document.querySelector('.tracking-card');
-    if(firstCard) firstCard.classList.add('selected');
-  }
+  // Update selected class on cards
+  const cards = document.querySelectorAll("#veiculosList .tracking-card");
+  cards.forEach(card => {
+    if (Number(card.dataset.id) === Number(id)) {
+      card.classList.add("selected");
+    } else {
+      card.classList.remove("selected");
+    }
+  });
 
   const detailPlate = document.getElementById("detailPlate");
   if(detailPlate) detailPlate.textContent = v.placa;
@@ -246,11 +276,8 @@ function selectVehicle(id, status, skipRender = false) {
     }
   };
 
-  const btnLigar = document.querySelector(".btn-outline-primary");
-  if(btnLigar) btnLigar.onclick = () => alert(`Iniciando chamada para motorista: ${v.motorista_nome || 'Desconhecido'}`);
-
-  const btnMsg = document.querySelector(".btn-primary");
-  if(btnMsg) btnMsg.onclick = () => alert(`Abrindo chat com motorista: ${v.motorista_nome || 'Desconhecido'}`);
+  // Show the details panel
+  showDetails('veiculos');
 }
 
 document.getElementById("addVeiculoBtn").onclick = () => {
@@ -367,6 +394,7 @@ async function loadMotoristas() {
   motoristasCache.forEach(m => {
     const card = document.createElement("div");
     card.className = "tracking-card";
+    card.dataset.id = m.id;
     if (m.id === selectedMotoristaId) card.classList.add("selected");
 
     card.innerHTML = `
@@ -386,34 +414,23 @@ async function loadMotoristas() {
     if (list) list.appendChild(card);
   });
 
-  if (!selectedMotoristaId && motoristasCache.length > 0) {
-    selectedMotoristaId = motoristasCache[0].id;
-    selectMotorista(selectedMotoristaId, true);
-  } else if (selectedMotoristaId && motoristasCache.length > 0) {
-    const idx = motoristasCache.findIndex(m => m.id === selectedMotoristaId);
-    if(idx > -1) selectMotorista(selectedMotoristaId, true);
-  } else if (motoristasCache.length === 0) {
-    document.getElementById("detailMotoristaNome").textContent = "Nenhum motorista";
-    document.getElementById("detailMotoristaStatus").innerHTML = "";
-    document.getElementById("detailMotoristaStatus").className = "status-badge";
-    const el = id => document.getElementById(id);
-    if(el("detailMotoristaIdade")) el("detailMotoristaIdade").textContent = "-";
-    if(el("detailMotoristaCpf")) el("detailMotoristaCpf").textContent = "-";
-    if(el("detailMotoristaCnh")) el("detailMotoristaCnh").textContent = "-";
-    if(el("detailMotoristaValidadeCnh")) el("detailMotoristaValidadeCnh").textContent = "-";
-    if(el("detailMotoristaTelefone")) el("detailMotoristaTelefone").textContent = "-";
-    if(el("detailMotoristaEmail")) el("detailMotoristaEmail").textContent = "-";
-  }
+  closeDetails('motoristas');
 }
 
-function selectMotorista(id, skipRender = false) {
+function selectMotorista(id) {
   selectedMotoristaId = id;
   const m = motoristasCache.find(mo => mo.id === id);
   if (!m) return;
 
-  if (!skipRender) {
-    loadMotoristas();
-  }
+  // Update selected class on cards
+  const cards = document.querySelectorAll("#motoristasList .tracking-card");
+  cards.forEach(card => {
+    if (Number(card.dataset.id) === Number(id)) {
+      card.classList.add("selected");
+    } else {
+      card.classList.remove("selected");
+    }
+  });
 
   const el = docId => document.getElementById(docId);
   if(el("detailMotoristaNome")) el("detailMotoristaNome").textContent = m.nome || 'Sem Nome';
@@ -444,6 +461,8 @@ function selectMotorista(id, skipRender = false) {
       deleteMotorista(m.id);
     }
   };
+
+  showDetails('motoristas');
 }
 
 document.getElementById("addMotoristaBtn").onclick = () => {
@@ -707,8 +726,324 @@ function loadPageData(pageId) {
   if (pageId === "dashboardPage") loadDashboard();
   if (pageId === "veiculosPage") loadVeiculos();
   if (pageId === "motoristasPage") loadMotoristas();
+  if (pageId === "equipePage") loadEquipe();
+  if (pageId === "ocorrenciasPage") loadOcorrencias();
   if (pageId === "manutencoesPage") loadManutencoes();
   if (pageId === "abastecimentosPage") loadAbastecimentos();
+}
+
+// ================= EQUIPE MÉDICA LOGIC =================
+let selectedEquipeId = null;
+
+function loadEquipe() {
+  const list = document.getElementById("equipeList");
+  if (!list) return;
+  list.innerHTML = "";
+
+  const badge = document.getElementById("badgeTotalEquipe");
+  if (badge) badge.textContent = equipeCache.length;
+
+  equipeCache.forEach(e => {
+    const card = document.createElement("div");
+    card.className = "tracking-card";
+    card.dataset.id = e.id;
+    if (e.id === selectedEquipeId) card.classList.add("selected");
+
+    card.innerHTML = `
+      <div class="tc-header">
+        <h3>${e.nome}</h3>
+        <span class="status-badge badge-available">
+          <i class="ph ph-check-circle"></i> ${e.status || 'Disponível'}
+        </span>
+      </div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
+        ${e.cargo} | ${e.registro}
+      </div>
+    `;
+
+    card.onclick = () => selectMembroEquipe(e.id);
+    list.appendChild(card);
+  });
+
+  closeDetails('equipe');
+}
+
+function selectMembroEquipe(id) {
+  selectedEquipeId = id;
+  const e = equipeCache.find(eq => eq.id === id);
+  if (!e) return;
+
+  // Update selected class on cards
+  const cards = document.querySelectorAll("#equipeList .tracking-card");
+  cards.forEach(card => {
+    if (Number(card.dataset.id) === Number(id)) {
+      card.classList.add("selected");
+    } else {
+      card.classList.remove("selected");
+    }
+  });
+
+  const el = docId => document.getElementById(docId);
+  if(el("detailEquipeNome")) el("detailEquipeNome").textContent = e.nome || 'Sem Nome';
+  if(el("detailEquipeStatus")) {
+    el("detailEquipeStatus").className = `status-badge badge-available`;
+    el("detailEquipeStatus").innerHTML = `<i class="ph ph-check-circle"></i> ${e.status || 'Disponível'}`;
+  }
+  
+  if(el("detailEquipeCargo")) el("detailEquipeCargo").textContent = e.cargo || '-';
+  if(el("detailEquipeRegistro")) el("detailEquipeRegistro").textContent = e.registro || '-';
+  if(el("detailEquipeTelefone")) el("detailEquipeTelefone").textContent = e.telefone || '-';
+  if(el("detailEquipeEmail")) el("detailEquipeEmail").textContent = e.email || '-';
+
+  const btnEdit = el("btnEditMembro");
+  if(btnEdit) btnEdit.onclick = () => editMembroEquipe(e.id);
+
+  const btnDel = el("btnDeleteMembro");
+  if(btnDel) btnDel.onclick = () => {
+    if(confirm(`Tem certeza que deseja remover o membro "${e.nome}"?`)) {
+      deleteMembroEquipe(e.id);
+    }
+  };
+
+  showDetails('equipe');
+}
+
+document.getElementById("addMembroBtn").onclick = () => {
+  equipeEditandoId = null;
+  resetEquipeForm();
+  document.getElementById("saveMembro").innerHTML = '<i class="ph ph-floppy-disk"></i> Salvar Profissional';
+  document.getElementById("equipeModal").classList.remove("hidden");
+};
+
+function resetEquipeForm() {
+  ["inputMembroNome", "inputMembroCargo", "inputMembroRegistro", "inputMembroTelefone", "inputMembroEmail"].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) {
+      el.value = (el.tagName === "SELECT") ? el.options[0].value : "";
+    }
+  });
+  document.getElementById("equipeModal").classList.add("hidden");
+}
+
+document.getElementById("cancelMembro").onclick = resetEquipeForm;
+const closeEquipeModalBtn = document.getElementById("closeEquipeModal");
+if (closeEquipeModalBtn) closeEquipeModalBtn.onclick = resetEquipeForm;
+
+document.getElementById("saveMembro").onclick = () => {
+  const data = {
+    nome: inputValue("inputMembroNome"),
+    cargo: inputValue("inputMembroCargo"),
+    registro: inputValue("inputMembroRegistro"),
+    telefone: inputValue("inputMembroTelefone"),
+    email: inputValue("inputMembroEmail"),
+    status: "Disponível"
+  };
+
+  if (equipeEditandoId) {
+    const idx = equipeCache.findIndex(e => e.id == equipeEditandoId);
+    if (idx > -1) {
+      equipeCache[idx] = { ...equipeCache[idx], ...data, status: equipeCache[idx].status };
+    }
+  } else {
+    const newId = equipeCache.length > 0 ? Math.max(...equipeCache.map(e => e.id)) + 1 : 1;
+    equipeCache.push({ id: newId, ...data });
+    selectedEquipeId = newId;
+  }
+
+  resetEquipeForm();
+  loadEquipe();
+};
+
+function editMembroEquipe(id) {
+  const e = equipeCache.find(eq => eq.id == id);
+  if(!e) return;
+
+  document.getElementById("inputMembroNome").value = e.nome || "";
+  document.getElementById("inputMembroCargo").value = e.cargo || "Médico";
+  document.getElementById("inputMembroRegistro").value = e.registro || "";
+  document.getElementById("inputMembroTelefone").value = e.telefone || "";
+  document.getElementById("inputMembroEmail").value = e.email || "";
+
+  equipeEditandoId = id;
+  document.getElementById("saveMembro").innerHTML = '<i class="ph ph-pencil-simple"></i> Atualizar Profissional';
+  document.getElementById("equipeModal").classList.remove("hidden");
+}
+
+function deleteMembroEquipe(id) {
+  equipeCache = equipeCache.filter(e => e.id != id);
+  if (selectedEquipeId == id) selectedEquipeId = null;
+  loadEquipe();
+}
+
+// ================= OCORRÊNCIAS LOGIC =================
+
+let selectedOcorrenciaId = null;
+
+function loadOcorrencias() {
+  const list = document.getElementById("ocorrenciasList");
+  if (!list) return;
+  list.innerHTML = "";
+
+  const badge = document.getElementById("badgeTotalOcorrencias");
+  if (badge) badge.textContent = ocorrenciasCache.length;
+
+  ocorrenciasCache.forEach(o => {
+    const card = document.createElement("div");
+    card.className = "tracking-card";
+    card.dataset.id = o.id;
+    if (o.id === selectedOcorrenciaId) card.classList.add("selected");
+
+    let statusClass = "badge-available";
+    let icon = "ph-check-circle";
+    if (o.status === "Ativa") { statusClass = "badge-emergency"; icon = "ph-warning-circle"; }
+    else if (o.status === "Em Atendimento") { statusClass = "badge-route"; icon = "ph-clock"; }
+
+    card.innerHTML = `
+      <div class="tc-header">
+        <h3 style="font-size: 14px;">${o.titulo.substring(0, 20)}...</h3>
+        <span class="status-badge ${statusClass}">
+          <i class="ph ${icon}"></i> ${o.status}
+        </span>
+      </div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-top: 10px;">
+        <i class="ph ph-calendar"></i> ${o.data} | Prioridade: ${o.prioridade}
+      </div>
+    `;
+
+    card.onclick = () => selectOcorrencia(o.id);
+    list.appendChild(card);
+  });
+
+  closeDetails('ocorrencias');
+}
+
+function selectOcorrencia(id) {
+  selectedOcorrenciaId = id;
+  const o = ocorrenciasCache.find(oc => oc.id === id);
+  if (!o) return;
+
+  // Update selected class on cards
+  const cards = document.querySelectorAll("#ocorrenciasList .tracking-card");
+  cards.forEach(card => {
+    if (Number(card.dataset.id) === Number(id)) {
+      card.classList.add("selected");
+    } else {
+      card.classList.remove("selected");
+    }
+  });
+
+  const el = docId => document.getElementById(docId);
+  if(el("detailOcorrenciaTitulo")) el("detailOcorrenciaTitulo").textContent = o.titulo || 'Sem Título';
+  
+  if(el("detailOcorrenciaStatus")) {
+    let statusClass = "badge-available";
+    let icon = "ph-check-circle";
+    if (o.status === "Ativa") { statusClass = "badge-emergency"; icon = "ph-warning-circle"; }
+    else if (o.status === "Em Atendimento") { statusClass = "badge-route"; icon = "ph-clock"; }
+
+    el("detailOcorrenciaStatus").className = `status-badge ${statusClass}`;
+    el("detailOcorrenciaStatus").innerHTML = `<i class="ph ${icon}"></i> ${o.status}`;
+  }
+  
+  if(el("detailOcorrenciaPrioridade")) el("detailOcorrenciaPrioridade").textContent = o.prioridade || '-';
+  if(el("detailOcorrenciaData")) el("detailOcorrenciaData").textContent = o.data || '-';
+  if(el("detailOcorrenciaPaciente")) el("detailOcorrenciaPaciente").textContent = o.paciente || '-';
+  if(el("detailOcorrenciaEndereco")) el("detailOcorrenciaEndereco").textContent = o.endereco || '-';
+  if(el("detailOcorrenciaVeiculo")) el("detailOcorrenciaVeiculo").textContent = o.veiculo_nome || 'Não vinculado';
+  if(el("detailOcorrenciaEquipe")) el("detailOcorrenciaEquipe").textContent = o.equipe_nome || 'Não vinculado';
+  if(el("detailOcorrenciaDescricao")) el("detailOcorrenciaDescricao").textContent = o.descricao || '-';
+
+  const btnEdit = el("btnEditOcorrencia");
+  if(btnEdit) btnEdit.onclick = () => editOcorrencia(o.id);
+
+  const btnDel = el("btnDeleteOcorrencia");
+  if(btnDel) btnDel.onclick = () => {
+    if(confirm(`Tem certeza que deseja remover a ocorrência "${o.titulo}"?`)) {
+      deleteOcorrencia(o.id);
+    }
+  };
+
+  const btnRes = el("btnResolverOcorrencia");
+  if(btnRes) btnRes.onclick = () => {
+    o.status = "Finalizada";
+    loadOcorrencias();
+  };
+
+  showDetails('ocorrencias');
+}
+
+document.getElementById("addOcorrenciaBtn").onclick = () => {
+  ocorrenciaEditandoId = null;
+  resetOcorrenciaForm();
+  document.getElementById("saveOcorrencia").innerHTML = '<i class="ph ph-paper-plane-right"></i> Salvar Ocorrência';
+  document.getElementById("ocorrenciaModal").classList.remove("hidden");
+};
+
+function resetOcorrenciaForm() {
+  ["inputOcorrenciaTitulo", "inputOcorrenciaPaciente", "inputOcorrenciaPrioridade", "inputOcorrenciaEndereco", "inputOcorrenciaStatus", "inputOcorrenciaVeiculo", "inputOcorrenciaEquipe", "inputOcorrenciaDescricao"].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) {
+      el.value = (el.tagName === "SELECT") ? el.options[0].value : "";
+      if(el.dataset) el.dataset.id = "";
+    }
+  });
+  document.getElementById("ocorrenciaModal").classList.add("hidden");
+}
+
+document.getElementById("cancelOcorrencia").onclick = resetOcorrenciaForm;
+const closeOcorrenciaModalBtn = document.getElementById("closeOcorrenciaModal");
+if (closeOcorrenciaModalBtn) closeOcorrenciaModalBtn.onclick = resetOcorrenciaForm;
+
+document.getElementById("saveOcorrencia").onclick = () => {
+  const data = {
+    titulo: inputValue("inputOcorrenciaTitulo"),
+    paciente: inputValue("inputOcorrenciaPaciente"),
+    prioridade: inputValue("inputOcorrenciaPrioridade"),
+    endereco: inputValue("inputOcorrenciaEndereco"),
+    status: inputValue("inputOcorrenciaStatus"),
+    veiculo_nome: inputValue("inputOcorrenciaVeiculo"),
+    equipe_nome: inputValue("inputOcorrenciaEquipe"),
+    descricao: inputValue("inputOcorrenciaDescricao"),
+    data: new Date().toISOString().split('T')[0]
+  };
+
+  if (ocorrenciaEditandoId) {
+    const idx = ocorrenciasCache.findIndex(o => o.id == ocorrenciaEditandoId);
+    if (idx > -1) {
+      ocorrenciasCache[idx] = { ...ocorrenciasCache[idx], ...data, data: ocorrenciasCache[idx].data };
+    }
+  } else {
+    const newId = ocorrenciasCache.length > 0 ? Math.max(...ocorrenciasCache.map(o => o.id)) + 1 : 1;
+    ocorrenciasCache.push({ id: newId, ...data });
+    selectedOcorrenciaId = newId;
+  }
+
+  resetOcorrenciaForm();
+  loadOcorrencias();
+};
+
+function editOcorrencia(id) {
+  const o = ocorrenciasCache.find(oc => oc.id == id);
+  if(!o) return;
+
+  document.getElementById("inputOcorrenciaTitulo").value = o.titulo || "";
+  document.getElementById("inputOcorrenciaPaciente").value = o.paciente || "";
+  document.getElementById("inputOcorrenciaPrioridade").value = o.prioridade || "Baixa";
+  document.getElementById("inputOcorrenciaEndereco").value = o.endereco || "";
+  document.getElementById("inputOcorrenciaStatus").value = o.status || "Ativa";
+  document.getElementById("inputOcorrenciaVeiculo").value = o.veiculo_nome || "";
+  document.getElementById("inputOcorrenciaEquipe").value = o.equipe_nome || "";
+  document.getElementById("inputOcorrenciaDescricao").value = o.descricao || "";
+
+  ocorrenciaEditandoId = id;
+  document.getElementById("saveOcorrencia").innerHTML = '<i class="ph ph-pencil-simple"></i> Atualizar Ocorrência';
+  document.getElementById("ocorrenciaModal").classList.remove("hidden");
+}
+
+function deleteOcorrencia(id) {
+  ocorrenciasCache = ocorrenciasCache.filter(o => o.id != id);
+  if (selectedOcorrenciaId == id) selectedOcorrenciaId = null;
+  loadOcorrencias();
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
