@@ -18,7 +18,7 @@ let ocorrenciasCache = [
   { id: 2, titulo: "Acidente de Trânsito", prioridade: "Crítica", status: "Em Atendimento", veiculo_nome: "HOS-4B21", equipe_nome: "Enf. Joana Silva", paciente: "Desconhecido", endereco: "Rodovia Castelo Branco, km 15", descricao: "Colisão entre dois carros.", data: "2026-05-18" }
 ];
 
-document.querySelectorAll(".sidebar nav a").forEach((link) => {
+document.querySelectorAll(".sidebar-nav-main a").forEach((link) => {
   link.addEventListener("click", (e) => {
     e.preventDefault();
     const target = link.getAttribute("data-target");
@@ -28,7 +28,7 @@ document.querySelectorAll(".sidebar nav a").forEach((link) => {
 
 function showPage(pageId) {
   document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
-  document.querySelectorAll(".sidebar nav a").forEach((l) => l.classList.remove("active"));
+  document.querySelectorAll(".sidebar-nav-main a").forEach((l) => l.classList.remove("active"));
 
   document.getElementById(pageId).classList.add("active");
   document.querySelector(`[data-target="${pageId}"]`).classList.add("active");
@@ -62,9 +62,34 @@ function closeDetails(section) {
   if (sidebar) sidebar.classList.remove('hidden');
 }
 
-document.getElementById("themeToggleBtn").onclick = () => {
-  document.body.classList.toggle("dark");
-};
+// ================= THEME TOGGLE =================
+function initTheme() {
+  const saved = localStorage.getItem('medfleet-theme');
+  const toggle = document.getElementById('themeToggleSwitch');
+  
+  if (saved === 'light') {
+    document.documentElement.classList.remove('dark');
+    if (toggle) toggle.checked = false;
+  } else {
+    document.documentElement.classList.add('dark');
+    if (toggle) toggle.checked = true;
+  }
+}
+
+const themeToggle = document.getElementById('themeToggleSwitch');
+if (themeToggle) {
+  themeToggle.addEventListener('change', () => {
+    if (themeToggle.checked) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('medfleet-theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('medfleet-theme', 'light');
+    }
+  });
+}
+
+initTheme();
 
 let usingMockMotoristas = false;
 
@@ -188,6 +213,8 @@ async function loadDashboard() {
     totalOcorrencias.textContent = ocorrenciasCache.length;
     viaturasRota.textContent = veiculosCache.length;
     equipeDisponivel.textContent = equipeCache.length;
+    const totalViaturasEl = document.getElementById('totalViaturas');
+    if (totalViaturasEl) totalViaturasEl.textContent = veiculosCache.length;
   } catch(e) {}
 }
 

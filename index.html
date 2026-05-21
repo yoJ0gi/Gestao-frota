@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" class="dark">
 
 <head>
   <meta charset="UTF-8">
@@ -21,40 +21,105 @@
         <i class="ph ph-heartbeat"></i>
         <h2>MedFleet</h2>
       </div>
-      <nav>
+      <nav class="sidebar-nav-main">
         <a href="#" class="active" data-target="dashboardPage"><i class="ph ph-squares-four"></i> Dashboard</a>
         <a href="#" data-target="ocorrenciasPage"><i class="ph ph-warning-circle"></i> Ocorrências</a>
         <a href="#" data-target="equipePage"><i class="ph ph-stethoscope"></i> Equipe Médica</a>
         <a href="#" data-target="veiculosPage"><i class="ph ph-ambulance"></i> Viaturas</a>
         <a href="#" data-target="motoristasPage"><i class="ph ph-steering-wheel"></i> Motoristas</a>
       </nav>
+      <div class="sidebar-bottom">
+        <div class="sidebar-bottom-item theme-toggle-item">
+          <i class="ph ph-moon"></i>
+          <span>Dark Mode</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="themeToggleSwitch" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <a href="#" class="sidebar-bottom-item" id="settingsLink">
+          <i class="ph ph-gear"></i>
+          <span>Configurações</span>
+        </a>
+        <a href="#" class="sidebar-bottom-item" id="logoutLink">
+          <i class="ph ph-sign-out"></i>
+          <span>Logout</span>
+        </a>
+      </div>
     </aside>
 
     <main class="content">
 
-      <section id="dashboardPage" class="page active">
-        <div class="page-header">
-          <div>
-            <h1>Dashboard</h1>
-            <p class="subtitle">Visão geral da sua frota</p>
+      <!-- TOP BAR -->
+      <header class="topbar">
+        <div class="topbar-search">
+          <i class="ph ph-magnifying-glass"></i>
+          <input type="text" placeholder="Buscar..." id="globalSearch">
+        </div>
+        <div class="topbar-right">
+          <button class="topbar-icon-btn" id="notificationBtn" title="Notificações">
+            <i class="ph ph-bell"></i>
+            <span class="notification-dot"></span>
+          </button>
+          <div class="topbar-user">
+            <div class="topbar-avatar">
+              <i class="ph ph-user"></i>
+            </div>
+            <div class="topbar-user-info">
+              <span class="topbar-user-name">Admin</span>
+              <span class="topbar-user-role">Administrador</span>
+            </div>
           </div>
-          <button id="themeToggleBtn" type="button">Modo Dark</button>
+        </div>
+      </header>
+
+      <section id="dashboardPage" class="page active">
+        <div class="welcome-banner">
+          <div>
+            <h1 class="welcome-title">Bem-vindo de volta, Admin 👋</h1>
+            <p class="welcome-subtitle">Aqui está o que acontece na sua frota hoje.</p>
+          </div>
         </div>
 
         <div class="cards">
           <div class="card">
-            <p><i class="ph ph-warning-circle" style="margin-right: 6px; font-size: 16px;"></i> Ocorrências Ativas</p>
-            <h2 id="totalOcorrencias">0</h2>
+            <div class="card-icon card-icon-red">
+              <i class="ph ph-warning-circle"></i>
+            </div>
+            <div class="card-info">
+              <p>Ocorrências Ativas</p>
+              <h2 id="totalOcorrencias">0</h2>
+            </div>
           </div>
 
           <div class="card">
-            <p><i class="ph ph-navigation-arrow" style="margin-right: 6px; font-size: 16px;"></i> Viaturas em Rota</p>
-            <h2 id="viaturasRota">0</h2>
+            <div class="card-icon card-icon-blue">
+              <i class="ph ph-navigation-arrow"></i>
+            </div>
+            <div class="card-info">
+              <p>Viaturas em Rota</p>
+              <h2 id="viaturasRota">0</h2>
+            </div>
           </div>
 
           <div class="card">
-            <p><i class="ph ph-users" style="margin-right: 6px; font-size: 16px;"></i> Profissionais Disponíveis</p>
-            <h2 id="equipeDisponivel">0</h2>
+            <div class="card-icon card-icon-green">
+              <i class="ph ph-users"></i>
+            </div>
+            <div class="card-info">
+              <p>Profissionais Disponíveis</p>
+              <h2 id="equipeDisponivel">0</h2>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-icon card-icon-yellow">
+              <i class="ph ph-ambulance"></i>
+            </div>
+            <div class="card-info">
+              <p>Total de Viaturas</p>
+              <h2 id="totalViaturas">0</h2>
+            </div>
           </div>
         </div>
 
