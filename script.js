@@ -5,6 +5,8 @@ if (!token) {
   window.location.href = "login.html";
 }
 
+const API = "http://127.0.0.1:8000/api";
+
 // ================= AUTH FETCH INTERCEPTOR =================
 // Injeta automaticamente o header Authorization: Token <token> em todas
 // as requisições para a API, sem precisar alterar nenhum fetch individual.
@@ -844,10 +846,32 @@ async function deleteFuncionario(id) {
   await loadFuncionarios(currentFuncionarioFilter);
 }
 
+let usingMockManutencoes = false;
+let manutencoesCache = [
+  { id: 1, veiculo_placa: "AMB-1020", data: "2026-05-10", status: "Concluída", veiculo_id: 1 },
+  { id: 2, veiculo_placa: "HOS-4B21", data: "2026-05-15", status: "Em Andamento", veiculo_id: 2 },
+  { id: 3, veiculo_placa: "MED-9C44", data: "2026-05-20", status: "Agendada", veiculo_id: 3 }
+];
+
 async function loadManutencoes() {
   await loadVeiculosCache();
 
-  const data = await fetch(API + "/manutencoes").then(r => r.json());
+  let data = [];
+  try {
+    if (usingMockManutencoes) {
+      data = manutencoesCache;
+    } else {
+      data = await fetch(API + "/manutencoes").then(r => {
+        if (!r.ok) throw new Error("API failed");
+        return r.json();
+      });
+    }
+  } catch (err) {
+    console.warn("Backend offline, usando dados mockados de manutenções");
+    usingMockManutencoes = true;
+    data = manutencoesCache;
+  }
+
   const list = document.getElementById("manutencoesList");
   list.innerHTML = "";
 
@@ -877,8 +901,12 @@ document.getElementById("saveManutencao").onclick = async () => {
 
   if (!veiculoId) return alert("Selecione um veículo válido");
 
+  const veiculo = veiculosCache.find(v => v.id == veiculoId);
+  const placa = veiculo ? veiculo.placa : inputVeiculoManut.value;
+
   const data = {
     veiculo_id: veiculoId,
+    veiculo_placa: placa,
     data: inputDataManut.value,
     status: inputStatusManut.value
   };
@@ -886,19 +914,41 @@ document.getElementById("saveManutencao").onclick = async () => {
   const method = manutencaoEditandoId ? "PUT" : "POST";
   const url = manutencaoEditandoId ? `${API}/manutencoes/${manutencaoEditandoId}` : `${API}/manutencoes`;
 
-  await fetch(url, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  });
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error("API failed");
+  } catch (err) {
+    console.warn("Backend offline, salvando manutenção no cache local");
+    if (manutencaoEditandoId) {
+      const idx = manutencoesCache.findIndex(m => m.id == manutencaoEditandoId);
+      if (idx > -1) manutencoesCache[idx] = { ...manutencoesCache[idx], ...data };
+    } else {
+      const newId = manutencoesCache.length > 0 ? Math.max(...manutencoesCache.map(m => m.id)) + 1 : 1;
+      manutencoesCache.push({ id: newId, ...data });
+    }
+  }
 
   document.getElementById("manutencaoForm").classList.add("hidden");
   loadManutencoes();
 };
 
 async function editManutencao(id) {
-  const data = await fetch(API + "/manutencoes").then(r => r.json());
-  const m = data.find(m => m.id == id);
+  let m;
+  try {
+    if (usingMockManutencoes) {
+      m = manutencoesCache.find(m => m.id == id);
+    } else {
+      const data = await fetch(API + "/manutencoes").then(r => r.json());
+      m = data.find(m => m.id == id);
+    }
+  } catch(e) {
+    m = manutencoesCache.find(m => m.id == id);
+  }
+  if (!m) return;
 
   const veiculo = veiculosCache.find(v => v.id == m.veiculo_id);
 
@@ -912,10 +962,42 @@ async function editManutencao(id) {
   document.getElementById("manutencaoForm").classList.remove("hidden");
 }
 
+async function deleteManutencao(id) {
+  try {
+    const res = await fetch(`${API}/manutencoes/${id}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("API failed");
+  } catch(e) {
+    console.warn("Backend offline, removendo manutenção do cache local");
+    manutencoesCache = manutencoesCache.filter(m => m.id != id);
+  }
+  loadManutencoes();
+}
+
+let usingMockAbastecimentos = false;
+let abastecimentosCache = [
+  { id: 1, veiculo_placa: "AMB-1020", data: "2026-05-12", tipo_combustivel: "diesel", posto: "Ipiranga", litros: "50", valor: "300", veiculo_id: 1 },
+  { id: 2, veiculo_placa: "HOS-4B21", data: "2026-05-18", tipo_combustivel: "gasolina", posto: "Shell", litros: "40", valor: "240", veiculo_id: 2 }
+];
+
 async function loadAbastecimentos() {
   await loadVeiculosCache();
 
-  const data = await fetch(API + "/abastecimentos").then(r => r.json());
+  let data = [];
+  try {
+    if (usingMockAbastecimentos) {
+      data = abastecimentosCache;
+    } else {
+      data = await fetch(API + "/abastecimentos").then(r => {
+        if (!r.ok) throw new Error("API failed");
+        return r.json();
+      });
+    }
+  } catch (err) {
+    console.warn("Backend offline, usando dados mockados de abastecimentos");
+    usingMockAbastecimentos = true;
+    data = abastecimentosCache;
+  }
+
   const list = document.getElementById("abastecimentosList");
   list.innerHTML = "";
 
@@ -933,7 +1015,18 @@ async function loadAbastecimentos() {
 }
 
 async function editAbastecimento(id) {
-  const a = (await fetch(API + "/abastecimentos").then(r => r.json())).find(a => a.id == id);
+  let a;
+  try {
+    if (usingMockAbastecimentos) {
+      a = abastecimentosCache.find(a => a.id == id);
+    } else {
+      const data = await fetch(API + "/abastecimentos").then(r => r.json());
+      a = data.find(a => a.id == id);
+    }
+  } catch(e) {
+    a = abastecimentosCache.find(a => a.id == id);
+  }
+  if (!a) return;
 
   inputVeiculoAbast.value = a.veiculo_placa;
   inputVeiculoAbast.dataset.id = a.veiculo_id;
@@ -948,7 +1041,13 @@ async function editAbastecimento(id) {
 }
 
 async function deleteAbastecimento(id) {
-  await fetch(`${API}/abastecimentos/${id}`, { method: "DELETE" });
+  try {
+    const res = await fetch(`${API}/abastecimentos/${id}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("API failed");
+  } catch(e) {
+    console.warn("Backend offline, removendo abastecimento do cache local");
+    abastecimentosCache = abastecimentosCache.filter(a => a.id != id);
+  }
   loadAbastecimentos();
 }
 
@@ -978,9 +1077,13 @@ document.getElementById("saveAbastecimento").onclick = async () => {
 
   if (!veiculoId) return alert("Selecione um veículo válido");
 
+  const veiculo = veiculosCache.find(v => v.id == veiculoId);
+  const placa = veiculo ? veiculo.placa : inputVeiculoAbast.value;
+
   const tipoCombustivel = document.getElementById("combustivel").value;
   const data = {
     veiculo_id: veiculoId,
+    veiculo_placa: placa,
     data: inputValue("inputDataAbast"),
     tipo_combustivel: tipoCombustivel,
     posto: inputValue("inputPosto"),
@@ -991,11 +1094,23 @@ document.getElementById("saveAbastecimento").onclick = async () => {
   const method = abastecimentoEditandoId ? "PUT" : "POST";
   const url = abastecimentoEditandoId ? `${API}/abastecimentos/${abastecimentoEditandoId}` : `${API}/abastecimentos`;
 
-  await fetch(url, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  });
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error("API failed");
+  } catch (err) {
+    console.warn("Backend offline, salvando abastecimento no cache local");
+    if (abastecimentoEditandoId) {
+      const idx = abastecimentosCache.findIndex(a => a.id == abastecimentoEditandoId);
+      if (idx > -1) abastecimentosCache[idx] = { ...abastecimentosCache[idx], ...data };
+    } else {
+      const newId = abastecimentosCache.length > 0 ? Math.max(...abastecimentosCache.map(a => a.id)) + 1 : 1;
+      abastecimentosCache.push({ id: newId, ...data });
+    }
+  }
 
   resetAbastecimentoForm();
   loadAbastecimentos();
